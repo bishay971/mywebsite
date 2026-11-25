@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Statistical programming · Bishwas Adhikari</title>
+<meta name="description" content="R packages, Shiny apps and statistical analysis by Bishwas Adhikari.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Theme and JS flags before first paint, to avoid a flash
+  (function(){var d=document.documentElement;d.classList.add('js');try{var t=localStorage.getItem('theme');if(t)d.setAttribute('data-theme',t)}catch(e){}})();
+</script>
+<script src="main.js" defer></script>
+</head>
+<body class="t-stats">
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav-shell" id="navShell">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">BA</span><span class="brand-name">Bishwas Adhikari</span></a>
+    <ul class="nav-links" id="navLinks"><li><a href="music.html">Music</a></li><li><a href="statistics.html" aria-current="page">Statistics</a></li><li><a href="writing.html">Writing</a></li><li><a href="index.html#about">About</a></li></ul>
+    <div class="nav-actions">
+      
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 9h16M4 15h16"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <div class="page-hero">
+    <div class="wrap page-hero-grid">
+      <div class="page-hero-copy">
+        <nav class="crumb" aria-label="Breadcrumb" data-reveal><a href="index.html">Home</a><span aria-hidden="true">/</span><span aria-current="page">Statistics</span></nav>
+        <h1 data-reveal style="--i:1">Statistical programming <em class="s">in&nbsp;R</em></h1>
+        <p class="lead" data-reveal style="--i:2">R packages, Shiny apps and statistical analysis, from clinical-style tables to live dashboards. Each project states the question, the method and the result.</p>
+      </div>
+      <div class="page-hero-aside" data-reveal style="--i:2">
+        <ul class="stats">
+          <li><b>4</b><span>Selected projects</span></li>
+          <li><b>R</b><span>Main language</span></li>
+          <li><b>Shiny</b><span>Interactive apps</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <section id="projects">
+    <div class="wrap">
+      <div class="data-grid">
+        <div class="data-aside">
+          <span class="eyebrow" data-reveal><b>01</b> &nbsp;/&nbsp; Projects</span>
+          <h2 data-reveal style="--i:1;margin-top:20px">Question, method, <em class="s">result</em></h2>
+          <p class="sub" data-reveal style="--i:2">Selected work. Each one states what it set out to answer and how.</p>
+          <div class="panel" data-reveal style="--i:3" aria-hidden="true"><div class="stream">
+  <span class="stream-label"><span class="pulse"></span>live estimate</span>
+  <svg viewBox="0 0 800 180" preserveAspectRatio="none">
+    <defs><linearGradient id="streamFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+    <path class="ar" id="streamArea"/><path class="ln" id="streamLine"/>
+  </svg>
+</div></div>
+        </div>
+        <ol class="projects">
+          <li class="proj" data-reveal data-spark="4,6,5,9,8,12,11,15,14,18"><span class="ix">01</span><div><h3>Survey weighting dashboard<span class="badge" style="margin-left:10px;vertical-align:4px">Featured</span></h3><p>Interactive tool that shows how weighting changes survey estimates.</p><div class="tags"><span>R</span><span>Shiny</span><span>survey</span></div></div><svg class="spark" viewBox="0 0 128 56" aria-hidden="true"></svg></li><li class="proj" data-reveal data-spark="12,12,11,13,12,14,13,13,15,14"><span class="ix">02</span><div><h3>Trial summary tables</h3><p>Reproducible tables and listings, generated from one analysis script.</p><div class="tags"><span>R</span><span>tidyverse</span><span>gt</span></div></div><svg class="spark" viewBox="0 0 128 56" aria-hidden="true"></svg></li><li class="proj" data-reveal data-spark="9,14,7,12,16,10,15,19,13,17"><span class="ix">03</span><div><h3>Election results explorer</h3><p>Maps and trend lines connecting my data work to my political writing.</p><div class="tags"><span>R</span><span>ggplot2</span><span>sf</span></div></div><svg class="spark" viewBox="0 0 128 56" aria-hidden="true"></svg></li><li class="proj" data-reveal data-spark="2,3,5,6,8,9,11,13,14,17"><span class="ix">04</span><div><h3>R tips, weekly</h3><p>Short, tested snippets for people who work with data every day.</p><div class="tags"><span>Quarto</span><span>GitHub</span></div></div><svg class="spark" viewBox="0 0 128 56" aria-hidden="true"></svg></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="toolkit">
+    <div class="wrap">
+      <div class="sec-head">
+        <span class="eyebrow" data-reveal><b>02</b> &nbsp;/&nbsp; Toolkit</span>
+        <div class="sec-title" data-reveal style="--i:1"><h2>What I <em class="s">work with</em></h2></div>
+      </div>
+      <div class="hl-stats" style="align-items:start">
+        <div class="hl-copy" data-reveal>
+          <div class="toolkit" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+            <div><b>R</b><span>Analysis and packages</span></div><div><b>Shiny</b><span>Interactive apps</span></div><div><b>tidyverse</b><span>Data wrangling</span></div><div><b>ggplot2</b><span>Charts and graphics</span></div><div><b>gt</b><span>Publication tables</span></div><div><b>sf</b><span>Maps and spatial data</span></div><div><b>survey</b><span>Weighted estimates</span></div><div><b>Quarto</b><span>Reports and posts</span></div>
+          </div>
+        </div>
+        <div class="panel" data-reveal style="--i:1" aria-hidden="true"><pre class="code"><span class="cl"><span class="cm"># does practice predict the score?</span></span>
+<span class="cl">fit <span class="op">&lt;-</span> lm(score ~ hours, data = survey)</span>
+<span class="cl">broom<span class="op">::</span>glance(fit)<span class="op">$</span>r.squared</span>
+<span class="cl"><span class="out">[1] <span data-r2>0.8137</span></span><span class="caret"></span></span></pre></div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="wrap" style="margin-top:clamp(96px,12vw,168px)">
+  <a class="next" href="writing.html" data-reveal><span><span class="eyebrow">Next</span><b>Writing</b></span><span class="go" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+</div>
+<footer>
+  <div class="wrap foot">
+    <div><div class="foot-name">Bishwas Adhikari</div><p>&copy; <span class="yr">2026</span> &middot; Statistician, singer, writer.</p></div>
+    <ul>
+      <li><a href="https://www.youtube.com/@bishwasadhikari" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8A26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15V9l5.2 3Z"/></svg>YouTube</a></li>
+      <li><a href="https://open.spotify.com/artist/2B9ODQLUVhuA46qZMykUoS" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.6 14.4a.6.6 0 0 1-.9.2c-2.4-1.5-5.4-1.8-9-1a.6.6 0 1 1-.3-1.2c3.9-.9 7.2-.5 9.9 1.1.3.2.4.6.3.9Zm1.2-2.7a.8.8 0 0 1-1 .3c-2.7-1.7-6.9-2.2-10.2-1.2a.8.8 0 1 1-.4-1.5c3.7-1.1 8.4-.6 11.4 1.3.4.2.5.7.2 1.1Zm.1-2.8C14.7 9 9.3 8.8 6.2 9.8a.9.9 0 1 1-.5-1.8c3.6-1.1 9.5-.9 13.2 1.3a.9.9 0 0 1-.9 1.6Z"/></svg>Spotify</a></li>
+    </ul>
+    <ul><li><a href="index.html">Home</a></li><li><a href="music.html">Music</a></li><li><a href="statistics.html">Statistics</a></li><li><a href="writing.html">Writing</a></li></ul>
+  </div>
+</footer>
+</body>
+</html>

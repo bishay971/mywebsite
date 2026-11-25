@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Writing · Bishwas Adhikari</title>
+<meta name="description" content="Essays on world politics, spirituality and science by Bishwas Adhikari.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=Geist+Mono:wght@400;500&family=Newsreader:ital,opsz,wght@0,6..72,300..500;1,6..72,300..500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Theme and JS flags before first paint, to avoid a flash
+  (function(){var d=document.documentElement;d.classList.add('js');try{var t=localStorage.getItem('theme');if(t)d.setAttribute('data-theme',t)}catch(e){}})();
+</script>
+<script src="main.js" defer></script>
+</head>
+<body class="t-writing">
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav-shell" id="navShell">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">BA</span><span class="brand-name">Bishwas Adhikari</span></a>
+    <ul class="nav-links" id="navLinks"><li><a href="music.html">Music</a></li><li><a href="statistics.html">Statistics</a></li><li><a href="writing.html" aria-current="page">Writing</a></li><li><a href="index.html#about">About</a></li></ul>
+    <div class="nav-actions">
+      
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 9h16M4 15h16"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <div class="page-hero">
+    <div class="wrap page-hero-grid">
+      <div class="page-hero-copy">
+        <nav class="crumb" aria-label="Breadcrumb" data-reveal><a href="index.html">Home</a><span aria-hidden="true">/</span><span aria-current="page">Writing</span></nav>
+        <h1 data-reveal style="--i:1">Curious events, <em class="s">read slowly</em></h1>
+        <p class="lead" data-reveal style="--i:2">Essays on world events, inner life, and the odd facts that make me stop and think.</p>
+      </div>
+      <div class="page-hero-aside" data-reveal style="--i:2">
+        <ul class="stats">
+          <li><b>4</b><span>Essays</span></li>
+          <li><b>3</b><span>Topics</span></li>
+          <li><b>Oct 28</b><span>Latest</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <section id="essays">
+    <div class="wrap">
+      <div class="toolbar" data-reveal>
+        <div class="chips" role="group" aria-label="Filter essays by topic">
+          <button class="chip" type="button" aria-pressed="true" data-f="all">All<span class="n"></span></button>
+          <button class="chip" type="button" aria-pressed="false" data-f="Politics">World politics<span class="n"></span></button>
+          <button class="chip" type="button" aria-pressed="false" data-f="Spirituality">Spirituality<span class="n"></span></button>
+          <button class="chip" type="button" aria-pressed="false" data-f="Science">Science<span class="n"></span></button>
+        </div>
+        <div class="field">
+          <label for="q">Search essays</label>
+          <div class="search">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="m10.5 10.5 3 3"/></svg>
+            <input class="input" id="q" type="search" placeholder="Try &ldquo;crows&rdquo; or &ldquo;silence&rdquo;" autocomplete="off">
+          </div>
+        </div>
+      </div>
+      <div class="posts" id="posts" aria-live="polite">
+        <article class="post" data-c="Politics">
+          <div><time datetime="2026-10-28">Oct 28, 2026</time><span class="rt">7 min read</span></div>
+          <div><h3>Why small countries decide big votes</h3><p>A look at how blocs of a few million people keep tipping outcomes at the UN, with the numbers behind it.</p></div>
+          <span class="tag">Politics</span>
+        </article><article class="post" data-c="Spirituality">
+          <div><time datetime="2026-10-19">Oct 19, 2026</time><span class="rt">5 min read</span></div>
+          <div><h3>What silence taught me about singing</h3><p>The pause between notes is where the meaning sits. Notes on breath, stillness and attention.</p></div>
+          <span class="tag">Spirituality</span>
+        </article><article class="post" data-c="Science">
+          <div><time datetime="2026-10-11">Oct 11, 2026</time><span class="rt">6 min read</span></div>
+          <div><h3>The coincidence that was not one</h3><p>Why surprising overlaps are common, and how a simple simulation in R shows it.</p></div>
+          <span class="tag">Science</span>
+        </article><article class="post" data-c="Science">
+          <div><time datetime="2026-09-30">Sep 30, 2026</time><span class="rt">4 min read</span></div>
+          <div><h3>Do crows count?</h3><p>A short tour of the evidence on animal numeracy, and how to read these studies critically.</p></div>
+          <span class="tag">Science</span>
+        </article>
+        <div class="empty" id="empty" hidden>
+          <div class="empty-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M5 4h10l4 4v12H5z"/><path d="M15 4v4h4M9 13h6M9 17h4"/></svg></div>
+          <div>
+            <h3>Nothing here yet</h3>
+            <p id="emptyText">No essays match that search.</p>
+            <button class="btn btn-sm" type="button" id="clear">Clear filters</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="sub-grid" data-reveal>
+        <div class="sub-copy">
+          <span class="eyebrow">Letters</span>
+          <h2>Get new essays <em class="s">by email</em></h2>
+          <p class="sub">One message when a new post is published. Nothing else.</p>
+        </div>
+        <div class="sub-form">
+          <form id="subForm" novalidate>
+            <div class="form-stack">
+              <label class="eyebrow" for="em">Email address</label>
+              <div class="form-row">
+                <input class="input" type="email" id="em" name="email" placeholder="you@example.com" autocomplete="email" aria-describedby="emHelp emErr">
+                <button class="btn btn-primary" type="submit" id="subBtn">Subscribe</button>
+              </div>
+              <p class="help" id="emHelp">Unsubscribe from any email with one click.</p>
+              <p class="err" id="emErr" role="alert" hidden><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 4.8v3.6M8 11h.01"/></svg><span></span></p>
+            </div>
+          </form>
+          <div class="done" id="done" hidden role="status">
+            <span class="done-mark" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m5 10.5 3.2 3L15 6.5"/></svg></span>
+            <div><h3>You are on the list</h3><p id="doneText"></p><p class="note">Demo only: connect an email service to send real mail.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="wrap" style="margin-top:clamp(96px,12vw,168px)">
+  <a class="next" href="music.html" data-reveal><span><span class="eyebrow">Next</span><b>Music</b></span><span class="go" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+</div>
+<footer>
+  <div class="wrap foot">
+    <div><div class="foot-name">Bishwas Adhikari</div><p>&copy; <span class="yr">2026</span> &middot; Statistician, singer, writer.</p></div>
+    <ul>
+      <li><a href="https://www.youtube.com/@bishwasadhikari" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8A26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15V9l5.2 3Z"/></svg>YouTube</a></li>
+      <li><a href="https://open.spotify.com/artist/2B9ODQLUVhuA46qZMykUoS" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.6 14.4a.6.6 0 0 1-.9.2c-2.4-1.5-5.4-1.8-9-1a.6.6 0 1 1-.3-1.2c3.9-.9 7.2-.5 9.9 1.1.3.2.4.6.3.9Zm1.2-2.7a.8.8 0 0 1-1 .3c-2.7-1.7-6.9-2.2-10.2-1.2a.8.8 0 1 1-.4-1.5c3.7-1.1 8.4-.6 11.4 1.3.4.2.5.7.2 1.1Zm.1-2.8C14.7 9 9.3 8.8 6.2 9.8a.9.9 0 1 1-.5-1.8c3.6-1.1 9.5-.9 13.2 1.3a.9.9 0 0 1-.9 1.6Z"/></svg>Spotify</a></li>
+    </ul>
+    <ul><li><a href="index.html">Home</a></li><li><a href="music.html">Music</a></li><li><a href="statistics.html">Statistics</a></li><li><a href="writing.html">Writing</a></li></ul>
+  </div>
+</footer>
+</body>
+</html>

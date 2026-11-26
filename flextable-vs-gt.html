@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>flextable vs gt · Bishwas Adhikari</title>
+<meta name="description" content="FDA Standard Safety Table 2 built from the same data, twice. A comparison of two R table libraries for clinical reporting.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300..700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<script>
+  // Theme and JS flags before first paint, to avoid a flash
+  (function(){var d=document.documentElement;d.classList.add('js');try{var t=localStorage.getItem('theme');if(t)d.setAttribute('data-theme',t)}catch(e){}})();
+</script>
+<script src="main.js" defer></script>
+</head>
+<body class="t-stats">
+<a class="skip" href="#main">Skip to content</a>
+<header class="nav-shell" id="navShell">
+  <nav class="nav" aria-label="Main">
+    <a class="brand" href="index.html"><span class="brand-mark" aria-hidden="true">BA</span><span class="brand-name">Bishwas Adhikari</span></a>
+    <ul class="nav-links" id="navLinks"><li><a href="music.html">Music</a></li><li><a href="statistics.html" aria-current="page">Statistics</a></li><li><a href="writing.html">Writing</a></li><li><a href="index.html#about">About</a></li></ul>
+    <div class="nav-actions">
+      
+      <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="navLinks" aria-label="Open menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 9h16M4 15h16"/></svg>
+      </button>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <div class="page-hero cs-hero">
+    <div class="wrap page-hero-grid">
+      <div class="page-hero-copy">
+        <nav class="crumb" aria-label="Breadcrumb" data-reveal><a href="index.html">Home</a><span class="sep" aria-hidden="true">/</span><a href="statistics.html">Statistics</a><span class="sep" aria-hidden="true">/</span><span aria-current="page">Case study</span></nav>
+        <span class="eyebrow cs-kicker" data-reveal style="--i:1"><b>Case study</b> &nbsp;&middot;&nbsp; Clinical reporting in R</span>
+        <h1 data-reveal style="--i:2">flextable vs gt: <em class="s">one demographics table, two libraries</em></h1>
+        <p class="lead" data-reveal style="--i:3">FDA Standard Safety Table 2 built from the same data, twice.</p>
+        <div class="tags" data-reveal style="--i:4"><span>R</span><span>flextable</span><span>gt</span><span>officer</span><span>dplyr</span><span>CDISC ADaM</span></div>
+      </div>
+      <div class="page-hero-aside" data-reveal style="--i:2">
+        <ul class="stats">
+          <li><b>254</b><span>Subjects</span></li>
+          <li><b>21</b><span>Table rows</span></li>
+          <li><b>25 / 45</b><span>Lines of code, flextable / gt</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="wrap">
+    <section class="chapter" id="ch1">
+      <div class="chapter-head" data-reveal><span class="num">01</span><h2>The data</h2></div>
+      <div class="chapter-body"><div class="prose"><p>Both tables use the same input: the public <strong>CDISC Pilot 01</strong> ADSL dataset, available in R as <code>safetyData::adam_adsl</code> (one row per subject, 254 subjects). We keep the Safety Population.</p></div>
+      <dl class="dataset" data-reveal>
+        <div><dt>Study</dt><dd>CDISC Pilot 01</dd></div>
+        <div><dt>Dataset</dt><dd>ADSL</dd></div>
+        <div><dt>Subjects</dt><dd>254</dd></div>
+        <div><dt>Arms (N)</dt><dd>84 / 84 / 86</dd></div>
+      </dl>
+      <div class="codebox">
+  <div class="codebar"><span><b>Load and filter</b> &middot; 6 lines &middot; R</span><button class="copy" type="button" aria-label="Copy Load and filter code"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="8.5" height="8.5" rx="2"/><path d="M10.5 5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1H5"/></svg><span>Copy</span></button></div>
+  <pre><code>adsl <span class="tk-op">&lt;-</span> safetyData::adam_adsl <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">filter</span>(SAFFL == <span class="tk-st">"Y"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">mutate</span>(
+    CHARAFL = <span class="tk-fn">if_else</span>(EDUCLVL &gt;= <span class="tk-nu">10</span>, <span class="tk-st">"Y"</span>, <span class="tk-st">"N"</span>, missing = <span class="tk-st">"N"</span>),  <span class="tk-cm"># Characteristic A</span>
+    CHARBFL = <span class="tk-fn">if_else</span>(BMIBL   &gt;= <span class="tk-nu">16</span>, <span class="tk-st">"Y"</span>, <span class="tk-st">"N"</span>, missing = <span class="tk-st">"N"</span>)   <span class="tk-cm"># Characteristic B</span>
+  )</code></pre>
+</div></div>
+    </section>
+    <section class="chapter" id="ch2">
+      <div class="chapter-head" data-reveal><span class="num">02</span><h2>One shared results dataframe</h2></div>
+      <div class="chapter-body"><div class="prose"><p>Computing the statistics has nothing to do with the table library, so it is done <strong>once</strong>. Both tables below start from the same <code>demog</code> dataframe and the same column headers, title and footnotes. That way, any difference you see in the code comes from flextable or gt, not from the data preparation.</p></div>
+      <div class="pipe" data-reveal>
+        <div class="node"><small>Input</small><b>adam_adsl</b><small style="margin-top:6px">254 subjects</small></div>
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 14h18M17 8l6 6-6 6"/></svg>
+        <div class="node hot"><small>Computed once</small><b>demog</b><div class="schema"><span>block</span><span>label</span><span>dose_a</span><span>dose_b</span><span>control</span><span>total</span></div></div>
+        <svg viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 14h18M17 8l6 6-6 6"/></svg>
+        <div class="outs"><div class="node"><small>Method 1</small><b>flextable</b></div><div class="node"><small>Method 2</small><b>gt</b></div></div>
+      </div>
+      <div class="prose"><p>This is what both libraries receive: a block (section) column, a row label column, and one text column for each arm.</p></div>
+      <div class="codebox collapsed">
+  <div class="codebar"><span><b>Shared summary</b> &middot; 77 lines &middot; R</span><button class="copy" type="button" aria-label="Copy Shared summary code"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="8.5" height="8.5" rx="2"/><path d="M10.5 5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1H5"/></svg><span>Copy</span></button></div>
+  <pre><code><span class="tk-cm"># Data value -&gt; column key (order = column order). Total is a copy of all subjects.</span>
+arm_cols <span class="tk-op">&lt;-</span> <span class="tk-fn">c</span>(<span class="tk-st">"Xanomeline High Dose"</span> = <span class="tk-st">"dose_a"</span>,
+              <span class="tk-st">"Xanomeline Low Dose"</span>  = <span class="tk-st">"dose_b"</span>,
+              <span class="tk-st">"Placebo"</span>              = <span class="tk-st">"control"</span>,
+              <span class="tk-st">"Total"</span>                = <span class="tk-st">"total"</span>)
+
+anl <span class="tk-op">&lt;-</span> <span class="tk-fn">bind_rows</span>(adsl, <span class="tk-fn">mutate</span>(adsl, TRT01A = <span class="tk-st">"Total"</span>)) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">mutate</span>(TRT = <span class="tk-fn">factor</span>(arm_cols[TRT01A], levels = arm_cols))
+
+big_n <span class="tk-op">&lt;-</span> <span class="tk-fn">count</span>(anl, TRT, name = <span class="tk-st">"N"</span>)
+
+<span class="tk-cm"># n (%) for every listed category, including those with 0 subjects</span>
+n_pct <span class="tk-op">&lt;-</span> <span class="tk-kw">function</span>(data, var, lvls) {
+  data <span class="tk-op">|&gt;</span>
+    <span class="tk-fn">mutate</span>(label = <span class="tk-fn">factor</span>(.data[[var]], levels = <span class="tk-fn">names</span>(lvls), labels = lvls)) <span class="tk-op">|&gt;</span>
+    <span class="tk-fn">filter</span>(!<span class="tk-fn">is.na</span>(label)) <span class="tk-op">|&gt;</span>
+    <span class="tk-fn">count</span>(TRT, label, .drop = <span class="tk-kw">FALSE</span>) <span class="tk-op">|&gt;</span>
+    <span class="tk-fn">left_join</span>(big_n, by = <span class="tk-st">"TRT"</span>) <span class="tk-op">|&gt;</span>
+    <span class="tk-fn">transmute</span>(TRT, label = <span class="tk-fn">as.character</span>(label),
+              value = <span class="tk-fn">if_else</span>(n == <span class="tk-nu">0</span>, <span class="tk-st">"0"</span>, <span class="tk-fn">sprintf</span>(<span class="tk-st">"%d (%.1f)"</span>, n, <span class="tk-nu">100</span> * n / N)))
+}
+
+<span class="tk-cm"># Mean (SD) and Median (min, max)</span>
+mean_median <span class="tk-op">&lt;-</span> <span class="tk-kw">function</span>(data, var) {
+  data <span class="tk-op">|&gt;</span>
+    <span class="tk-fn">summarise</span>(
+      .by = TRT,
+      `Mean (SD)`         = <span class="tk-fn">sprintf</span>(<span class="tk-st">"%.1f (%.2f)"</span>, <span class="tk-fn">mean</span>(.data[[var]]), <span class="tk-fn">sd</span>(.data[[var]])),
+      `Median (min, max)` = <span class="tk-fn">sprintf</span>(<span class="tk-st">"%.1f (%.0f, %.0f)"</span>, <span class="tk-fn">median</span>(.data[[var]]),
+                                    <span class="tk-fn">min</span>(.data[[var]]), <span class="tk-fn">max</span>(.data[[var]]))
+    ) <span class="tk-op">|&gt;</span>
+    <span class="tk-fn">pivot_longer</span>(-TRT, names_to = <span class="tk-st">"label"</span>, values_to = <span class="tk-st">"value"</span>)
+}
+
+sex_lvls  <span class="tk-op">&lt;-</span> <span class="tk-fn">c</span>(<span class="tk-st">"M"</span> = <span class="tk-st">"Male"</span>, <span class="tk-st">"F"</span> = <span class="tk-st">"Female"</span>)
+age_lvls  <span class="tk-op">&lt;-</span> <span class="tk-fn">c</span>(<span class="tk-st">"&lt;65"</span> = <span class="tk-st">"&lt;65"</span>, <span class="tk-st">"65-80"</span> = <span class="tk-st">"65-80"</span>, <span class="tk-st">"&gt;80"</span> = <span class="tk-st">"&gt;80"</span>)
+race_lvls <span class="tk-op">&lt;-</span> <span class="tk-fn">c</span>(<span class="tk-st">"AMERICAN INDIAN OR ALASKA NATIVE"</span>          = <span class="tk-st">"American Indian or Alaska Native"</span>,
+               <span class="tk-st">"ASIAN"</span>                                     = <span class="tk-st">"Asian"</span>,
+               <span class="tk-st">"BLACK OR AFRICAN AMERICAN"</span>                 = <span class="tk-st">"Black or African American"</span>,
+               <span class="tk-st">"NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER"</span> = <span class="tk-st">"Native Hawaiian or other Pacific Islander"</span>,
+               <span class="tk-st">"WHITE"</span>                                     = <span class="tk-st">"White"</span>,
+               <span class="tk-st">"NOT REPORTED"</span>                              = <span class="tk-st">"Not reported"</span>,
+               <span class="tk-st">"OTHER"</span>                                     = <span class="tk-st">"Other"</span>,
+               <span class="tk-st">"UNKNOWN"</span>                                   = <span class="tk-st">"Unknown"</span>)
+eth_lvls  <span class="tk-op">&lt;-</span> <span class="tk-fn">c</span>(<span class="tk-st">"HISPANIC OR LATINO"</span>     = <span class="tk-st">"Hispanic or Latino"</span>,
+               <span class="tk-st">"NOT HISPANIC OR LATINO"</span> = <span class="tk-st">"Not Hispanic or Latino"</span>,
+               <span class="tk-st">"NOT REPORTED"</span>           = <span class="tk-st">"Not reported"</span>,
+               <span class="tk-st">"UNKNOWN"</span>                = <span class="tk-st">"Unknown"</span>)
+
+demog <span class="tk-op">&lt;-</span> <span class="tk-fn">bind_rows</span>(
+  <span class="tk-st">"Sex, n (%)"</span>                               = <span class="tk-fn">n_pct</span>(anl, <span class="tk-st">"SEX"</span>, sex_lvls),
+  <span class="tk-st">"Age, years"</span>                               = <span class="tk-fn">mean_median</span>(anl, <span class="tk-st">"AGE"</span>),
+  <span class="tk-st">"Age groups (years), n (%)"</span>                = <span class="tk-fn">n_pct</span>(anl, <span class="tk-st">"AGEGR1"</span>, age_lvls),
+  <span class="tk-st">"Race, n (%)"</span>                              = <span class="tk-fn">n_pct</span>(anl, <span class="tk-st">"RACE"</span>, race_lvls),
+  <span class="tk-st">"Ethnicity, n (%)"</span>                         = <span class="tk-fn">n_pct</span>(anl, <span class="tk-st">"ETHNIC"</span>, eth_lvls),
+  <span class="tk-st">"Clinical baseline characteristics, n (%)"</span> = <span class="tk-fn">bind_rows</span>(
+    <span class="tk-fn">n_pct</span>(anl, <span class="tk-st">"CHARAFL"</span>, <span class="tk-fn">c</span>(<span class="tk-st">"Y"</span> = <span class="tk-st">"Characteristic A"</span>)),
+    <span class="tk-fn">n_pct</span>(anl, <span class="tk-st">"CHARBFL"</span>, <span class="tk-fn">c</span>(<span class="tk-st">"Y"</span> = <span class="tk-st">"Characteristic B"</span>))
+  ),
+  .id = <span class="tk-st">"block"</span>
+) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">pivot_wider</span>(names_from = TRT, values_from = value) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">select</span>(block, label, <span class="tk-fn">all_of</span>(<span class="tk-fn">unname</span>(arm_cols)))
+
+<span class="tk-cm"># Text shared by both tables</span>
+col_labels <span class="tk-op">&lt;-</span> <span class="tk-fn">c</span>(dose_a  = <span class="tk-st">"Drug Name\nDosage A"</span>,
+                dose_b  = <span class="tk-st">"Drug Name\nDosage B"</span>,
+                control = <span class="tk-st">"Control"</span>,
+                total   = <span class="tk-st">"Total Population"</span>)
+col_labels <span class="tk-op">&lt;-</span> <span class="tk-fn">setNames</span>(<span class="tk-fn">paste0</span>(col_labels, <span class="tk-st">"\nN="</span>, big_n$N), big_n$TRT)
+
+title <span class="tk-op">&lt;-</span> <span class="tk-st">"Table 2. Demographics and Baseline Clinical Characteristics, Safety Population, Pooled Analysis (or Trial X)"</span>
+footnotes <span class="tk-op">&lt;-</span> <span class="tk-fn">c</span>(
+  <span class="tk-st">"Source: [include Applicant source, datasets and/or software tools used]."</span>,
+  <span class="tk-st">"Note: Duration = [e.g., X-week double-blind treatment period or median and a range of pooled trial durations]."</span>,
+  <span class="tk-st">"Abbreviations: n, number of subjects with given characteristic; N, number of subjects in treatment arm; SD, standard deviation."</span>
+)</code></pre><button class="more-code" type="button" aria-expanded="false" data-label="Show all 77 lines"><span>Show all 77 lines</span></button>
+</div></div>
+    </section>
+    <section class="chapter wide" id="ch3">
+      <div class="chapter-head" data-reveal><span class="num">03</span><h2>The result</h2></div>
+      <div class="chapter-body"><div class="prose"><p>Both libraries print this table: 21 rows in six blocks, one column per arm plus the total. <strong>Web view</strong> adds a bar for every percentage. <strong>Submission view</strong> shows it the way flextable and gt render it: Arial 9 pt, a rule under the title, under the column labels and after every block.</p></div>
+      <div class="tbl-tools">
+        <div class="seg" data-view-switch="ctbl" data-v="web" role="group" aria-label="Table view"><span class="pill" aria-hidden="true"></span><button type="button" data-v="web" aria-pressed="true">Web view</button><button type="button" data-v="print" aria-pressed="false">Submission view</button></div>
+        <span class="tbl-hint">Values from the rendered report</span>
+      </div>
+      <div class="ctable-wrap" id="ctbl" data-reveal>
+  <table class="ctable">
+    <caption>Table 2. Demographics and Baseline Clinical Characteristics, Safety Population, Pooled Analysis (or Trial X)</caption>
+    <thead><tr><th scope="col">Characteristic</th><th scope="col">Drug Name Dosage A<small>N=84</small></th><th scope="col">Drug Name Dosage B<small>N=84</small></th><th scope="col">Control<small>N=86</small></th><th scope="col">Total Population<small>N=254</small></th></tr></thead>
+    <tbody><tr class="grp"><th scope="rowgroup" colspan="5">Sex, n (%)</th></tr><tr><th scope="row">Male</th><td>44 (52.4)<span class="bar" aria-hidden="true"><i style="--p:0.524"></i></span></td><td>34 (40.5)<span class="bar" aria-hidden="true"><i style="--p:0.405"></i></span></td><td>33 (38.4)<span class="bar" aria-hidden="true"><i style="--p:0.384"></i></span></td><td class="tot">111 (43.7)<span class="bar" aria-hidden="true"><i style="--p:0.437"></i></span></td></tr><tr><th scope="row">Female</th><td>40 (47.6)<span class="bar" aria-hidden="true"><i style="--p:0.476"></i></span></td><td>50 (59.5)<span class="bar" aria-hidden="true"><i style="--p:0.595"></i></span></td><td>53 (61.6)<span class="bar" aria-hidden="true"><i style="--p:0.616"></i></span></td><td class="tot">143 (56.3)<span class="bar" aria-hidden="true"><i style="--p:0.563"></i></span></td></tr><tr class="grp"><th scope="rowgroup" colspan="5">Age, years</th></tr><tr><th scope="row">Mean (SD)</th><td>74.4 (7.89)</td><td>75.7 (8.29)</td><td>75.2 (8.59)</td><td class="tot">75.1 (8.25)</td></tr><tr><th scope="row">Median (min, max)</th><td>76.0 (56, 88)</td><td>77.5 (51, 88)</td><td>76.0 (52, 89)</td><td class="tot">77.0 (51, 89)</td></tr><tr class="grp"><th scope="rowgroup" colspan="5">Age groups (years), n (%)</th></tr><tr><th scope="row">&lt;65</th><td>11 (13.1)<span class="bar" aria-hidden="true"><i style="--p:0.131"></i></span></td><td>8 (9.5)<span class="bar" aria-hidden="true"><i style="--p:0.095"></i></span></td><td>14 (16.3)<span class="bar" aria-hidden="true"><i style="--p:0.163"></i></span></td><td class="tot">33 (13.0)<span class="bar" aria-hidden="true"><i style="--p:0.130"></i></span></td></tr><tr><th scope="row">65-80</th><td>55 (65.5)<span class="bar" aria-hidden="true"><i style="--p:0.655"></i></span></td><td>47 (56.0)<span class="bar" aria-hidden="true"><i style="--p:0.560"></i></span></td><td>42 (48.8)<span class="bar" aria-hidden="true"><i style="--p:0.488"></i></span></td><td class="tot">144 (56.7)<span class="bar" aria-hidden="true"><i style="--p:0.567"></i></span></td></tr><tr><th scope="row">&gt;80</th><td>18 (21.4)<span class="bar" aria-hidden="true"><i style="--p:0.214"></i></span></td><td>29 (34.5)<span class="bar" aria-hidden="true"><i style="--p:0.345"></i></span></td><td>30 (34.9)<span class="bar" aria-hidden="true"><i style="--p:0.349"></i></span></td><td class="tot">77 (30.3)<span class="bar" aria-hidden="true"><i style="--p:0.303"></i></span></td></tr><tr class="grp"><th scope="rowgroup" colspan="5">Race, n (%)</th></tr><tr><th scope="row">American Indian or Alaska Native</th><td>1 (1.2)<span class="bar" aria-hidden="true"><i style="--p:0.012"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="tot">1 (0.4)<span class="bar" aria-hidden="true"><i style="--p:0.004"></i></span></td></tr><tr><th scope="row">Asian</th><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero tot">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td></tr><tr><th scope="row">Black or African American</th><td>9 (10.7)<span class="bar" aria-hidden="true"><i style="--p:0.107"></i></span></td><td>6 (7.1)<span class="bar" aria-hidden="true"><i style="--p:0.071"></i></span></td><td>8 (9.3)<span class="bar" aria-hidden="true"><i style="--p:0.093"></i></span></td><td class="tot">23 (9.1)<span class="bar" aria-hidden="true"><i style="--p:0.091"></i></span></td></tr><tr><th scope="row">Native Hawaiian or other Pacific Islander</th><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero tot">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td></tr><tr><th scope="row">White</th><td>74 (88.1)<span class="bar" aria-hidden="true"><i style="--p:0.881"></i></span></td><td>78 (92.9)<span class="bar" aria-hidden="true"><i style="--p:0.929"></i></span></td><td>78 (90.7)<span class="bar" aria-hidden="true"><i style="--p:0.907"></i></span></td><td class="tot">230 (90.6)<span class="bar" aria-hidden="true"><i style="--p:0.906"></i></span></td></tr><tr><th scope="row">Not reported</th><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero tot">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td></tr><tr><th scope="row">Other</th><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero tot">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td></tr><tr><th scope="row">Unknown</th><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero tot">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td></tr><tr class="grp"><th scope="rowgroup" colspan="5">Ethnicity, n (%)</th></tr><tr><th scope="row">Hispanic or Latino</th><td>3 (3.6)<span class="bar" aria-hidden="true"><i style="--p:0.036"></i></span></td><td>6 (7.1)<span class="bar" aria-hidden="true"><i style="--p:0.071"></i></span></td><td>3 (3.5)<span class="bar" aria-hidden="true"><i style="--p:0.035"></i></span></td><td class="tot">12 (4.7)<span class="bar" aria-hidden="true"><i style="--p:0.047"></i></span></td></tr><tr><th scope="row">Not Hispanic or Latino</th><td>81 (96.4)<span class="bar" aria-hidden="true"><i style="--p:0.964"></i></span></td><td>78 (92.9)<span class="bar" aria-hidden="true"><i style="--p:0.929"></i></span></td><td>83 (96.5)<span class="bar" aria-hidden="true"><i style="--p:0.965"></i></span></td><td class="tot">242 (95.3)<span class="bar" aria-hidden="true"><i style="--p:0.953"></i></span></td></tr><tr><th scope="row">Not reported</th><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero tot">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td></tr><tr><th scope="row">Unknown</th><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td><td class="zero tot">0<span class="bar" aria-hidden="true"><i style="--p:0.000"></i></span></td></tr><tr class="grp"><th scope="rowgroup" colspan="5">Clinical baseline characteristics, n (%)</th></tr><tr><th scope="row">Characteristic A</th><td>71 (84.5)<span class="bar" aria-hidden="true"><i style="--p:0.845"></i></span></td><td>67 (79.8)<span class="bar" aria-hidden="true"><i style="--p:0.798"></i></span></td><td>75 (87.2)<span class="bar" aria-hidden="true"><i style="--p:0.872"></i></span></td><td class="tot">213 (83.9)<span class="bar" aria-hidden="true"><i style="--p:0.839"></i></span></td></tr><tr><th scope="row">Characteristic B</th><td>82 (97.6)<span class="bar" aria-hidden="true"><i style="--p:0.976"></i></span></td><td>83 (98.8)<span class="bar" aria-hidden="true"><i style="--p:0.988"></i></span></td><td>84 (97.7)<span class="bar" aria-hidden="true"><i style="--p:0.977"></i></span></td><td class="tot">249 (98.0)<span class="bar" aria-hidden="true"><i style="--p:0.980"></i></span></td></tr></tbody>
+    <tfoot><tr><td colspan="5">Source: [include Applicant source, datasets and/or software tools used].<br>Note: Duration = [e.g., X-week double-blind treatment period or median and a range of pooled trial durations].<br>Abbreviations: n, number of subjects with given characteristic; N, number of subjects in treatment arm; SD, standard deviation.</td></tr></tfoot>
+  </table>
+</div></div>
+    </section>
+    <section class="chapter wide" id="ch4">
+      <div class="chapter-head" data-reveal><span class="num">04</span><h2>Two methods, same table</h2></div>
+      <div class="chapter-body"><div class="duel">
+        <article class="duel-card" data-reveal style="--i:0">
+        <span class="kicker">Method 1 &middot; imperative</span>
+        <h3>flextable</h3>
+        <div class="loc"><span>about 25 lines</span><span class="meter"><i style="--p:0.556"></i></span></div>
+        <div class="prose"><p><code>as_grouped_data()</code> turns <code>block</code> into section header rows. After that, styling is a chain of verbs, and each verb takes a <code>part</code> (header, body or footer) and optional <code>i</code>/<code>j</code> row and column selectors.</p></div>
+        <div class="codebox">
+  <div class="codebar"><span><b>flextable</b> &middot; 28 lines &middot; R</span><button class="copy" type="button" aria-label="Copy flextable code"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="8.5" height="8.5" rx="2"/><path d="M10.5 5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1H5"/></svg><span>Copy</span></button></div>
+  <pre><code>thin <span class="tk-op">&lt;-</span> <span class="tk-fn">fp_border</span>(color = <span class="tk-st">"black"</span>, width = <span class="tk-nu">1</span>)
+
+ft <span class="tk-op">&lt;-</span> demog <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">as_grouped_data</span>(groups = <span class="tk-st">"block"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">as_flextable</span>(hide_grouplabel = <span class="tk-kw">TRUE</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">set_header_labels</span>(values = <span class="tk-fn">c</span>(label = <span class="tk-st">"Characteristic"</span>, col_labels)) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">add_header_lines</span>(title) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">add_footer_lines</span>(footnotes) <span class="tk-op">|&gt;</span>
+  <span class="tk-cm"># fonts</span>
+  <span class="tk-fn">font</span>(fontname = <span class="tk-st">"Arial"</span>, part = <span class="tk-st">"all"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">fontsize</span>(size = <span class="tk-nu">9</span>, part = <span class="tk-st">"all"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">fontsize</span>(size = <span class="tk-nu">8</span>, part = <span class="tk-st">"footer"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">bold</span>(part = <span class="tk-st">"header"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-cm"># alignment</span>
+  <span class="tk-fn">align</span>(j = <span class="tk-nu">1</span>, align = <span class="tk-st">"left"</span>, part = <span class="tk-st">"all"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">align</span>(j = -<span class="tk-nu">1</span>, align = <span class="tk-st">"right"</span>, part = <span class="tk-st">"all"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">valign</span>(valign = <span class="tk-st">"bottom"</span>, part = <span class="tk-st">"header"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-cm"># borders: under the title, under the column labels, after every block</span>
+  <span class="tk-fn">border_remove</span>() <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">hline</span>(i = <span class="tk-nu">1</span>, border = thin, part = <span class="tk-st">"header"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">hline_bottom</span>(border = thin, part = <span class="tk-st">"header"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">hline</span>(i = <span class="tk-op">~</span> <span class="tk-fn">lead</span>(!<span class="tk-fn">is.na</span>(block), default = <span class="tk-kw">TRUE</span>), border = thin, part = <span class="tk-st">"body"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-cm"># spacing: compact rows, indent the detail rows</span>
+  <span class="tk-fn">padding</span>(padding.top = <span class="tk-nu">0</span>, padding.bottom = <span class="tk-nu">0</span>, part = <span class="tk-st">"all"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">padding</span>(i = <span class="tk-op">~</span> !<span class="tk-fn">is.na</span>(label), j = <span class="tk-nu">1</span>, padding.left = <span class="tk-nu">15</span>, part = <span class="tk-st">"body"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">set_table_properties</span>(width = <span class="tk-nu">1</span>, layout = <span class="tk-st">"autofit"</span>)
+
+ft</code></pre>
+</div>
+      </article>
+        <article class="duel-card" data-reveal style="--i:1">
+        <span class="kicker">Method 2 &middot; declarative</span>
+        <h3>gt</h3>
+        <div class="loc"><span>about 45 lines</span><span class="meter"><i style="--p:1.000"></i></span></div>
+        <div class="prose"><p>gt is told what the columns <em>mean</em>. <code>groupname_col</code> makes the section rows, <code>rowname_col</code> makes the indented stub, and the look is set through <code>tab_options()</code> and <code>tab_style()</code>.</p></div>
+        <div class="codebox">
+  <div class="codebar"><span><b>gt</b> &middot; 46 lines &middot; R</span><button class="copy" type="button" aria-label="Copy gt code"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="5" width="8.5" height="8.5" rx="2"/><path d="M10.5 5V3.5a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1H5"/></svg><span>Copy</span></button></div>
+  <pre><code>gt_tbl <span class="tk-op">&lt;-</span> demog <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">gt</span>(groupname_col = <span class="tk-st">"block"</span>, rowname_col = <span class="tk-st">"label"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">tab_header</span>(title = title) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">tab_stubhead</span>(label = <span class="tk-st">"Characteristic"</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">cols_label</span>(.list = <span class="tk-fn">map</span>(col_labels, <span class="tk-op">\(x)</span> <span class="tk-fn">html</span>(<span class="tk-fn">gsub</span>(<span class="tk-st">"\n"</span>, <span class="tk-st">"&lt;br&gt;"</span>, x)))) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">cols_align</span>(align = <span class="tk-st">"right"</span>, columns = -label) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">tab_stub_indent</span>(rows = <span class="tk-fn">everything</span>(), indent = <span class="tk-nu">4</span>) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">tab_source_note</span>(<span class="tk-fn">html</span>(<span class="tk-fn">paste</span>(footnotes, collapse = <span class="tk-st">"&lt;br&gt;"</span>))) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">tab_style</span>(
+    style     = <span class="tk-fn">cell_text</span>(weight = <span class="tk-st">"bold"</span>, v_align = <span class="tk-st">"bottom"</span>),
+    locations = <span class="tk-fn">list</span>(<span class="tk-fn">cells_title</span>(), <span class="tk-fn">cells_column_labels</span>(), <span class="tk-fn">cells_stubhead</span>())
+  ) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">tab_style</span>(style = <span class="tk-fn">cell_text</span>(whitespace = <span class="tk-st">"nowrap"</span>), locations = <span class="tk-fn">cells_stub</span>()) <span class="tk-op">|&gt;</span>
+  <span class="tk-fn">tab_options</span>(
+    table.font.names          = <span class="tk-st">"Arial"</span>,
+    table.font.size           = <span class="tk-st">"9pt"</span>,
+    table.width               = <span class="tk-fn">pct</span>(<span class="tk-nu">100</span>),
+    heading.align             = <span class="tk-st">"left"</span>,
+    heading.title.font.size   = <span class="tk-st">"9pt"</span>,
+    source_notes.font.size    = <span class="tk-st">"8pt"</span>,
+    <span class="tk-cm"># borders: under the title, under the column labels, after every block</span>
+    table.border.top.style         = <span class="tk-st">"hidden"</span>,
+    table.border.bottom.style      = <span class="tk-st">"hidden"</span>,
+    heading.border.bottom.style    = <span class="tk-st">"solid"</span>,
+    heading.border.bottom.color    = <span class="tk-st">"black"</span>,
+    heading.border.bottom.width    = <span class="tk-st">"1px"</span>,
+    column_labels.border.top.style = <span class="tk-st">"hidden"</span>,
+    column_labels.border.bottom.color = <span class="tk-st">"black"</span>,
+    column_labels.border.bottom.width = <span class="tk-st">"1px"</span>,
+    row_group.border.top.color     = <span class="tk-st">"black"</span>,
+    row_group.border.top.width     = <span class="tk-st">"1px"</span>,
+    row_group.border.bottom.style  = <span class="tk-st">"hidden"</span>,
+    table_body.hlines.style        = <span class="tk-st">"hidden"</span>,
+    table_body.border.top.style    = <span class="tk-st">"hidden"</span>,
+    table_body.border.bottom.color = <span class="tk-st">"black"</span>,
+    table_body.border.bottom.width = <span class="tk-st">"1px"</span>,
+    stub.border.style              = <span class="tk-st">"hidden"</span>,
+    <span class="tk-cm"># spacing</span>
+    data_row.padding     = <span class="tk-fn">px</span>(<span class="tk-nu">1</span>),
+    row_group.padding    = <span class="tk-fn">px</span>(<span class="tk-nu">1</span>),
+    heading.padding      = <span class="tk-fn">px</span>(<span class="tk-nu">1</span>),
+    column_labels.padding = <span class="tk-fn">px</span>(<span class="tk-nu">1</span>),
+    source_notes.padding = <span class="tk-fn">px</span>(<span class="tk-nu">1</span>)
+  )
+
+gt_tbl</code></pre>
+</div>
+      </article>
+      </div></div>
+    </section>
+    <section class="chapter" id="ch5">
+      <div class="chapter-head" data-reveal><span class="num">05</span><h2>Which one is better to code?</h2></div>
+      <div class="chapter-body"><div class="prose"><p>The two programs produce the same table, but they are organised very differently. The flextable code is about 25 lines and the gt code about 45.</p></div>
+      <div class="cmp"><div class="cmp-row head"><span>Aspect</span><span>flextable</span><span>gt</span></div><div class="cmp-row" data-reveal><div class="aspect">Mental model</div><div><span class="lib">flextable</span>Imperative: "make row <em>i</em>, column <em>j</em> of part <em>p</em> look like this." Close to SAS PROC REPORT <code>compute</code> blocks.</div><div><span class="lib">gt</span>Declarative: "this column is the stub, this one is the group." The layout follows from what the columns mean.</div></div><div class="cmp-row" data-reveal><div class="aspect">Section header rows</div><div><span class="lib">flextable</span><code>as_grouped_data()</code>, then target rows with formulas such as <code>i = ~ lead(!is.na(block))</code></div><div><span class="lib">gt</span>Built in: <code>groupname_col = "block"</code></div></div><div class="cmp-row" data-reveal><div class="aspect">Indenting detail rows</div><div><span class="lib">flextable</span>Manual padding on the selected rows</div><div><span class="lib">gt</span><code>tab_stub_indent()</code></div></div><div class="cmp-row" data-reveal><div class="aspect">Borders</div><div><span class="lib">flextable</span>Explicit <code>border_remove()</code> + <code>hline()</code> calls. You can see exactly which line goes where.</div><div><span class="lib">gt</span>About 15 <code>tab_options()</code> border settings, mostly to <em>turn off</em> gt's default lines</div></div><div class="cmp-row" data-reveal><div class="aspect">Column widths</div><div><span class="lib">flextable</span>Autofit to content out of the box</div><div><span class="lib">gt</span>Splits the width evenly, so the stub needs <code>whitespace = "nowrap"</code> to stop labels wrapping</div></div><div class="cmp-row" data-reveal><div class="aspect">Multi-line headers</div><div><span class="lib">flextable</span>Plain <code>"\n"</code> in the label</div><div><span class="lib">gt</span>Needs HTML (<code>&lt;br&gt;</code>) and <code>html()</code>, which shows gt is HTML-first</div></div><div class="cmp-row" data-reveal><div class="aspect">Footnotes</div><div><span class="lib">flextable</span><code>add_footer_lines(footnotes)</code> takes a vector</div><div><span class="lib">gt</span>One <code>tab_source_note()</code> per note, or join them yourself</div></div><div class="cmp-row" data-reveal><div class="aspect">Word / RTF output</div><div><span class="lib">flextable</span>Native and complete (<code>save_as_docx()</code>, <code>save_as_rtf()</code>), so it is submission-ready</div><div><span class="lib">gt</span><code>gtsave()</code> can write .docx/.rtf, but some styling is lost. HTML/PDF is its strength.</div></div><div class="cmp-row" data-reveal><div class="aspect">Web output</div><div><span class="lib">flextable</span>Good</div><div><span class="lib">gt</span>Excellent (interactive options, nanoplots, themes)</div></div></div>
+      <p class="verdict-title">Verdict</p>
+      <ol class="verdict"><li data-reveal><span>gt has the <strong>better-structured code</strong>. The table's structure (groups, stub, column labels) is declared once, and you never count rows. If you add a block to <code>demog</code>, the table updates by itself.</span></li><li data-reveal><span>flextable is <strong>easier to reason about cell by cell</strong>, and it is the one you can <strong>submit</strong>: the same <code>ft</code> object goes straight to Word and RTF with every border and indent intact.</span></li><li data-reveal><span>A practical split for clinical reporting: use <strong>flextable</strong> for anything that goes into a CSR or regulatory submission, and <strong>gt</strong> for HTML reports, dashboards and the web.</span></li></ol>
+      <div class="split" data-reveal>
+        <div><small>For submissions</small><b>flextable</b><p>Anything that goes into a CSR or regulatory submission, straight to Word and RTF.</p></div>
+        <div><small>For the web</small><b>gt</b><p>HTML reports, dashboards and the web.</p></div>
+      </div>
+      <p class="cs-source">Built in R with dplyr, tidyr, purrr, flextable, officer and gt. Data: CDISC Pilot 01 ADSL via the safetyData package. Source: demog_flextable_vs_gt.qmd.</p></div>
+    </section>
+  </div>
+</main>
+<div class="wrap" style="margin-top:clamp(96px,12vw,168px)">
+  <a class="next" href="statistics.html" data-reveal><span><span class="eyebrow">Next</span><b>All statistics work</b></span><span class="go" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></span></a>
+</div>
+<footer>
+  <div class="wrap foot">
+    <div><div class="foot-name">Bishwas Adhikari</div><p>&copy; <span class="yr">2026</span> &middot; Statistician, singer, writer.</p></div>
+    <ul>
+      <li><a href="https://www.youtube.com/@bishwasadhikari" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.6 7.2a2.5 2.5 0 0 0-1.8-1.8C18.2 5 12 5 12 5s-6.2 0-7.8.4a2.5 2.5 0 0 0-1.8 1.8A26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.8 1.8c1.6.4 7.8.4 7.8.4s6.2 0 7.8-.4a2.5 2.5 0 0 0 1.8-1.8A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8ZM10 15V9l5.2 3Z"/></svg>YouTube</a></li>
+      <li><a href="https://open.spotify.com/artist/2B9ODQLUVhuA46qZMykUoS" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm4.6 14.4a.6.6 0 0 1-.9.2c-2.4-1.5-5.4-1.8-9-1a.6.6 0 1 1-.3-1.2c3.9-.9 7.2-.5 9.9 1.1.3.2.4.6.3.9Zm1.2-2.7a.8.8 0 0 1-1 .3c-2.7-1.7-6.9-2.2-10.2-1.2a.8.8 0 1 1-.4-1.5c3.7-1.1 8.4-.6 11.4 1.3.4.2.5.7.2 1.1Zm.1-2.8C14.7 9 9.3 8.8 6.2 9.8a.9.9 0 1 1-.5-1.8c3.6-1.1 9.5-.9 13.2 1.3a.9.9 0 0 1-.9 1.6Z"/></svg>Spotify</a></li>
+    </ul>
+    <ul><li><a href="index.html">Home</a></li><li><a href="music.html">Music</a></li><li><a href="statistics.html">Statistics</a></li><li><a href="writing.html">Writing</a></li></ul>
+  </div>
+</footer>
+</body>
+</html>

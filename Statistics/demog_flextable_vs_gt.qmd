@@ -1,0 +1,257 @@
+---
+title: "flextable vs gt: one demographics table, two libraries"
+subtitle: "FDA Standard Safety Table 2 built from the same data, twice"
+format:
+  html:
+    code-copy: true
+    code-overflow: wrap
+execute:
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| include: false
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(flextable)
+library(officer)
+library(gt)
+```
+
+## The data
+
+Both tables use the same input: the public **CDISC Pilot 01** ADSL dataset,
+available in R as `safetyData::adam_adsl` (one row per subject, 254 subjects).
+We keep the Safety Population.
+
+```{r}
+#| label: data
+adsl <- safetyData::adam_adsl |>
+  filter(SAFFL == "Y") |>
+  mutate(
+    CHARAFL = if_else(EDUCLVL >= 10, "Y", "N", missing = "N"),  # Characteristic A
+    CHARBFL = if_else(BMIBL   >= 16, "Y", "N", missing = "N")   # Characteristic B
+  )
+```
+
+## One shared results dataframe
+
+Computing the statistics has nothing to do with the table library, so it is
+done **once**. Both tables below start from the same `demog` dataframe and
+the same column headers, title and footnotes. That way, any difference you
+see in the code comes from flextable or gt, not from the data preparation.
+
+```{r}
+#| label: shared-summary
+# Data value -> column key (order = column order). Total is a copy of all subjects.
+arm_cols <- c("Xanomeline High Dose" = "dose_a",
+              "Xanomeline Low Dose"  = "dose_b",
+              "Placebo"              = "control",
+              "Total"                = "total")
+
+anl <- bind_rows(adsl, mutate(adsl, TRT01A = "Total")) |>
+  mutate(TRT = factor(arm_cols[TRT01A], levels = arm_cols))
+
+big_n <- count(anl, TRT, name = "N")
+
+# n (%) for every listed category, including those with 0 subjects
+n_pct <- function(data, var, lvls) {
+  data |>
+    mutate(label = factor(.data[[var]], levels = names(lvls), labels = lvls)) |>
+    filter(!is.na(label)) |>
+    count(TRT, label, .drop = FALSE) |>
+    left_join(big_n, by = "TRT") |>
+    transmute(TRT, label = as.character(label),
+              value = if_else(n == 0, "0", sprintf("%d (%.1f)", n, 100 * n / N)))
+}
+
+# Mean (SD) and Median (min, max)
+mean_median <- function(data, var) {
+  data |>
+    summarise(
+      .by = TRT,
+      `Mean (SD)`         = sprintf("%.1f (%.2f)", mean(.data[[var]]), sd(.data[[var]])),
+      `Median (min, max)` = sprintf("%.1f (%.0f, %.0f)", median(.data[[var]]),
+                                    min(.data[[var]]), max(.data[[var]]))
+    ) |>
+    pivot_longer(-TRT, names_to = "label", values_to = "value")
+}
+
+sex_lvls  <- c("M" = "Male", "F" = "Female")
+age_lvls  <- c("<65" = "<65", "65-80" = "65-80", ">80" = ">80")
+race_lvls <- c("AMERICAN INDIAN OR ALASKA NATIVE"          = "American Indian or Alaska Native",
+               "ASIAN"                                     = "Asian",
+               "BLACK OR AFRICAN AMERICAN"                 = "Black or African American",
+               "NATIVE HAWAIIAN OR OTHER PACIFIC ISLANDER" = "Native Hawaiian or other Pacific Islander",
+               "WHITE"                                     = "White",
+               "NOT REPORTED"                              = "Not reported",
+               "OTHER"                                     = "Other",
+               "UNKNOWN"                                   = "Unknown")
+eth_lvls  <- c("HISPANIC OR LATINO"     = "Hispanic or Latino",
+               "NOT HISPANIC OR LATINO" = "Not Hispanic or Latino",
+               "NOT REPORTED"           = "Not reported",
+               "UNKNOWN"                = "Unknown")
+
+demog <- bind_rows(
+  "Sex, n (%)"                               = n_pct(anl, "SEX", sex_lvls),
+  "Age, years"                               = mean_median(anl, "AGE"),
+  "Age groups (years), n (%)"                = n_pct(anl, "AGEGR1", age_lvls),
+  "Race, n (%)"                              = n_pct(anl, "RACE", race_lvls),
+  "Ethnicity, n (%)"                         = n_pct(anl, "ETHNIC", eth_lvls),
+  "Clinical baseline characteristics, n (%)" = bind_rows(
+    n_pct(anl, "CHARAFL", c("Y" = "Characteristic A")),
+    n_pct(anl, "CHARBFL", c("Y" = "Characteristic B"))
+  ),
+  .id = "block"
+) |>
+  pivot_wider(names_from = TRT, values_from = value) |>
+  select(block, label, all_of(unname(arm_cols)))
+
+# Text shared by both tables
+col_labels <- c(dose_a  = "Drug Name\nDosage A",
+                dose_b  = "Drug Name\nDosage B",
+                control = "Control",
+                total   = "Total Population")
+col_labels <- setNames(paste0(col_labels, "\nN=", big_n$N), big_n$TRT)
+
+title <- "Table 2. Demographics and Baseline Clinical Characteristics, Safety Population, Pooled Analysis (or Trial X)"
+footnotes <- c(
+  "Source: [include Applicant source, datasets and/or software tools used].",
+  "Note: Duration = [e.g., X-week double-blind treatment period or median and a range of pooled trial durations].",
+  "Abbreviations: n, number of subjects with given characteristic; N, number of subjects in treatment arm; SD, standard deviation."
+)
+```
+
+This is what both libraries receive: a block (section) column, a row label
+column, and one text column for each arm.
+
+```{r}
+#| label: show-demog
+demog
+```
+
+## Method 1: flextable
+
+`as_grouped_data()` turns `block` into section header rows. After that,
+styling is a chain of verbs, and each verb takes a `part` (header, body or
+footer) and optional `i`/`j` row and column selectors.
+
+```{r}
+#| label: flextable
+thin <- fp_border(color = "black", width = 1)
+
+ft <- demog |>
+  as_grouped_data(groups = "block") |>
+  as_flextable(hide_grouplabel = TRUE) |>
+  set_header_labels(values = c(label = "Characteristic", col_labels)) |>
+  add_header_lines(title) |>
+  add_footer_lines(footnotes) |>
+  # fonts
+  font(fontname = "Arial", part = "all") |>
+  fontsize(size = 9, part = "all") |>
+  fontsize(size = 8, part = "footer") |>
+  bold(part = "header") |>
+  # alignment
+  align(j = 1, align = "left", part = "all") |>
+  align(j = -1, align = "right", part = "all") |>
+  valign(valign = "bottom", part = "header") |>
+  # borders: under the title, under the column labels, after every block
+  border_remove() |>
+  hline(i = 1, border = thin, part = "header") |>
+  hline_bottom(border = thin, part = "header") |>
+  hline(i = ~ lead(!is.na(block), default = TRUE), border = thin, part = "body") |>
+  # spacing: compact rows, indent the detail rows
+  padding(padding.top = 0, padding.bottom = 0, part = "all") |>
+  padding(i = ~ !is.na(label), j = 1, padding.left = 15, part = "body") |>
+  set_table_properties(width = 1, layout = "autofit")
+
+ft
+```
+
+## Method 2: gt
+
+gt is told what the columns *mean*. `groupname_col` makes the section rows,
+`rowname_col` makes the indented stub, and the look is set through
+`tab_options()` and `tab_style()`.
+
+```{r}
+#| label: gt
+gt_tbl <- demog |>
+  gt(groupname_col = "block", rowname_col = "label") |>
+  tab_header(title = title) |>
+  tab_stubhead(label = "Characteristic") |>
+  cols_label(.list = map(col_labels, \(x) html(gsub("\n", "<br>", x)))) |>
+  cols_align(align = "right", columns = -label) |>
+  tab_stub_indent(rows = everything(), indent = 4) |>
+  tab_source_note(html(paste(footnotes, collapse = "<br>"))) |>
+  tab_style(
+    style     = cell_text(weight = "bold", v_align = "bottom"),
+    locations = list(cells_title(), cells_column_labels(), cells_stubhead())
+  ) |>
+  tab_style(style = cell_text(whitespace = "nowrap"), locations = cells_stub()) |>
+  tab_options(
+    table.font.names          = "Arial",
+    table.font.size           = "9pt",
+    table.width               = pct(100),
+    heading.align             = "left",
+    heading.title.font.size   = "9pt",
+    source_notes.font.size    = "8pt",
+    # borders: under the title, under the column labels, after every block
+    table.border.top.style         = "hidden",
+    table.border.bottom.style      = "hidden",
+    heading.border.bottom.style    = "solid",
+    heading.border.bottom.color    = "black",
+    heading.border.bottom.width    = "1px",
+    column_labels.border.top.style = "hidden",
+    column_labels.border.bottom.color = "black",
+    column_labels.border.bottom.width = "1px",
+    row_group.border.top.color     = "black",
+    row_group.border.top.width     = "1px",
+    row_group.border.bottom.style  = "hidden",
+    table_body.hlines.style        = "hidden",
+    table_body.border.top.style    = "hidden",
+    table_body.border.bottom.color = "black",
+    table_body.border.bottom.width = "1px",
+    stub.border.style              = "hidden",
+    # spacing
+    data_row.padding     = px(1),
+    row_group.padding    = px(1),
+    heading.padding      = px(1),
+    column_labels.padding = px(1),
+    source_notes.padding = px(1)
+  )
+
+gt_tbl
+```
+
+## Which one is better to code?
+
+The two programs produce the same table, but they are organised very
+differently. The flextable code is about 25 lines and the gt code about 45.
+
+| | flextable | gt |
+|---|---|---|
+| **Mental model** | Imperative: "make row *i*, column *j* of part *p* look like this." Close to SAS PROC REPORT `compute` blocks. | Declarative: "this column is the stub, this one is the group." The layout follows from what the columns mean. |
+| **Section header rows** | `as_grouped_data()`, then target rows with formulas such as `i = ~ lead(!is.na(block))` | Built in: `groupname_col = "block"` |
+| **Indenting detail rows** | Manual padding on the selected rows | `tab_stub_indent()` |
+| **Borders** | Explicit `border_remove()` + `hline()` calls. You can see exactly which line goes where. | About 15 `tab_options()` border settings, mostly to *turn off* gt's default lines |
+| **Column widths** | Autofit to content out of the box | Splits the width evenly, so the stub needs `whitespace = "nowrap"` to stop labels wrapping |
+| **Multi-line headers** | Plain `"\n"` in the label | Needs HTML (`<br>`) and `html()`, which shows gt is HTML-first |
+| **Footnotes** | `add_footer_lines(footnotes)` takes a vector | One `tab_source_note()` per note, or join them yourself |
+| **Word / RTF output** | Native and complete (`save_as_docx()`, `save_as_rtf()`), so it is submission-ready | `gtsave()` can write .docx/.rtf, but some styling is lost. HTML/PDF is its strength. |
+| **Web output** | Good | Excellent (interactive options, nanoplots, themes) |
+
+**Verdict.**
+
+* gt has the **better-structured code**. The table's structure (groups, stub,
+  column labels) is declared once, and you never count rows. If you add a
+  block to `demog`, the table updates by itself.
+* flextable is **easier to reason about cell by cell**, and it is the one
+  you can **submit**: the same `ft` object goes straight to Word and RTF
+  with every border and indent intact.
+* A practical split for clinical reporting: use **flextable** for anything
+  that goes into a CSR or regulatory submission, and **gt** for HTML
+  reports, dashboards and the web.

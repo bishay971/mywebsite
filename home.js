@@ -81,17 +81,16 @@
         onUpdate:function(){num.textContent=Math.round(o.v)+suf}});
     }
 
-    /* 6. Statistics: pinned on desktop while the analysis "runs" */
+    /* 6. Statistics: pinned on desktop while the table "builds" */
     var stats=$('#statistics .hl-stats');
     if(stats){
-      var r2=$('[data-r2]'),r={v:0};
       var tl=gsap.timeline({scrollTrigger:c.desktop
         ?{trigger:stats,start:'center center',end:'+=900',pin:true,scrub:.8}
         :{trigger:stats,start:'top 75%'}});
       tl.from('#statistics .hl-copy > *',{y:30,autoAlpha:0,stagger:.08,duration:.6})
         .from('#statistics .cl',{autoAlpha:.06,x:-12,stagger:.22,duration:.5},'<.15')
-        .fromTo('#statistics .stream',{clipPath:'inset(0 100% 0 0 round 20px)'},{clipPath:'inset(0 0% 0 0 round 20px)',duration:1.4,ease:'none'},'<.3')
-        .to(r,{v:.8137,duration:.9,ease:'power2.out',onUpdate:function(){if(r2)r2.textContent=r.v.toFixed(4)}},'-=.9');
+        .fromTo('#statistics .mini-tbl',{clipPath:'inset(0 0 100% 0 round 18px)'},{clipPath:'inset(0 0 0% 0 round 18px)',duration:1.2,ease:'none'},'<.4')
+        .from('#statistics .mini-tbl i',{scaleX:0,transformOrigin:'right',stagger:.05,duration:.5},'-=.6');
     }
 
     /* 7. Writing and About: words light up as you read down */

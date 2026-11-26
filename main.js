@@ -226,6 +226,37 @@
     });
   }
 
+  /* ---------- Code blocks: copy and expand ---------- */
+  $$('.codebox').forEach(function(box){
+    var pre=$('pre',box),copy=$('.copy',box),more=$('.more-code',box);
+    if(copy)copy.addEventListener('click',function(){
+      var label=$('span',copy),done=function(ok){
+        copy.classList.toggle('ok',ok);label.textContent=ok?'Copied':'Press Cmd+C';
+        setTimeout(function(){copy.classList.remove('ok');label.textContent='Copy'},1800);
+      };
+      if(navigator.clipboard&&navigator.clipboard.writeText){
+        navigator.clipboard.writeText(pre.textContent).then(function(){done(true)},function(){selectPre();done(false)});
+      }else{selectPre();done(false)}
+      function selectPre(){var r=document.createRange();r.selectNodeContents(pre);var s=getSelection();s.removeAllRanges();s.addRange(r)}
+    });
+    if(more)more.addEventListener('click',function(){
+      var open=box.classList.toggle('collapsed')===false;
+      more.setAttribute('aria-expanded',String(open));
+      $('span',more).textContent=open?'Show less':more.dataset.label;
+      if(!open)box.scrollIntoView({behavior:reduce?'auto':'smooth',block:'nearest'});
+    });
+  });
+
+  /* ---------- Clinical table: web view / submission view ---------- */
+  $$('[data-view-switch]').forEach(function(seg){
+    var wrap=$('#'+seg.dataset.viewSwitch),btns=$$('button',seg);
+    btns.forEach(function(b){b.addEventListener('click',function(){
+      var v=b.dataset.v;seg.dataset.v=v;
+      btns.forEach(function(o){o.setAttribute('aria-pressed',String(o===b))});
+      wrap.classList.toggle('print',v==='print');
+    })});
+  });
+
   /* ---------- Decorative equalizers ---------- */
   $$('[data-eq]').forEach(function(node){
     var count=+node.dataset.eq||24;

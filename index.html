@@ -90,7 +90,7 @@
   </button>
 </div>
           <a class="spin-badge" href="music.html" aria-label="Open the music page">
-  <svg viewBox="0 0 120 120" aria-hidden="true"><defs><path id="c5459" d="M60,60 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/></defs><text><textPath href="#c5459" textLength="290" lengthAdjust="spacing">Most watched &#183; 116K views &#183; </textPath></text></svg>
+  <svg viewBox="0 0 120 120" aria-hidden="true"><defs><path id="badge1" d="M60,60 m-47,0 a47,47 0 1,1 94,0 a47,47 0 1,1 -94,0"/></defs><text><textPath href="#badge1" textLength="290" lengthAdjust="spacing">Most watched &#183; 116K views &#183; </textPath></text></svg>
   <span class="spin-core"><svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M6.5 4.2v11.6L16 10z"/></svg></span>
 </a>
         </div>
@@ -119,24 +119,19 @@
       </div>
       <div class="hl-stats">
         <div class="hl-copy">
-          <span class="eyebrow">Featured project</span>
-          <h3>Survey weighting dashboard</h3>
-          <p>Interactive tool that shows how weighting changes survey estimates.</p>
-          <div class="tags"><span>R</span><span>Shiny</span><span>survey</span></div>
-          <p style="margin-top:32px"><a class="more" href="statistics.html">See all 4 projects <svg class="arr" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></p>
+          <span class="eyebrow">Latest case study</span>
+          <h3>flextable vs gt: one demographics table, two libraries</h3>
+          <p>FDA Standard Safety Table 2 built from the same data, twice. Same 254 subjects, same numbers, two very different ways to write the code.</p>
+          <div class="tags"><span>R</span><span>flextable</span><span>gt</span><span>CDISC ADaM</span></div>
+          <p style="margin-top:32px"><a class="more" href="flextable-vs-gt.html">Read the case study <svg class="arr" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></p>
         </div>
         <div class="panel" aria-hidden="true">
-          <pre class="code"><span class="cl"><span class="cm"># does practice predict the score?</span></span>
-<span class="cl">fit <span class="op">&lt;-</span> lm(score ~ hours, data = survey)</span>
-<span class="cl">broom<span class="op">::</span>glance(fit)<span class="op">$</span>r.squared</span>
-<span class="cl"><span class="out">[1] <span data-r2>0.8137</span></span><span class="caret"></span></span></pre>
-          <div class="stream">
-  <span class="stream-label"><span class="pulse"></span>live estimate</span>
-  <svg viewBox="0 0 800 180" preserveAspectRatio="none">
-    <defs><linearGradient id="streamFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
-    <path class="ar" id="streamArea"/><path class="ln" id="streamLine"/>
-  </svg>
-</div>
+          <pre class="code"><span class="cl">gt_tbl <span class="tk-op">&lt;-</span> demog <span class="tk-op">|&gt;</span></span>
+<span class="cl">  <span class="tk-fn">gt</span>(groupname_col = <span class="tk-st">"block"</span>, rowname_col = <span class="tk-st">"label"</span>) <span class="tk-op">|&gt;</span></span>
+<span class="cl">  <span class="tk-fn">tab_header</span>(title = title) <span class="tk-op">|&gt;</span></span>
+<span class="cl">  <span class="tk-fn">tab_stubhead</span>(label = <span class="tk-st">"Characteristic"</span>) <span class="tk-op">|&gt;</span></span>
+<span class="cl">  ...</span></pre>
+          <div class="mini-tbl" aria-hidden="true"><div class="r h"><span>N</span><span>Dose A<br>N=84</span><span>Dose B<br>N=84</span><span>Control<br>N=86</span><span>Total<br>N=254</span></div><span class="g">Sex, n (%)</span><div class="r"><span>Male</span><span>44 (52.4)<i style="--p:0.524"></i></span><span>34 (40.5)<i style="--p:0.405"></i></span><span>33 (38.4)<i style="--p:0.384"></i></span><span>111 (43.7)<i style="--p:0.437"></i></span></div><div class="r"><span>Female</span><span>40 (47.6)<i style="--p:0.476"></i></span><span>50 (59.5)<i style="--p:0.595"></i></span><span>53 (61.6)<i style="--p:0.616"></i></span><span>143 (56.3)<i style="--p:0.563"></i></span></div><span class="g">Age, years</span><div class="r"><span>Mean (SD)</span><span>74.4 (7.89)</span><span>75.7 (8.29)</span><span>75.2 (8.59)</span><span>75.1 (8.25)</span></div><span class="g">Age groups (years), n (%)</span><div class="r"><span>&gt;80</span><span>18 (21.4)<i style="--p:0.214"></i></span><span>29 (34.5)<i style="--p:0.345"></i></span><span>30 (34.9)<i style="--p:0.349"></i></span><span>77 (30.3)<i style="--p:0.303"></i></span></div></div>
         </div>
       </div>
     </div>
